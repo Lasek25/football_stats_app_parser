@@ -5,7 +5,7 @@ This repo contains set of web scrapers created with Python language, they are a 
 They scrape selected data about football leagues, teams and matches stats from [Flashscore](https://flashscore.pl) website and then save them in application's database.
 
 ## Tech Stack
-* Python (version: 3.6.1)
+* Python (version: 3.6.4)
 * MySQL
 * Selenium (version: 3.141.0)
 * ChromeDriver (version depends on your Chrome version)
