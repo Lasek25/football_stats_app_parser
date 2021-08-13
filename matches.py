@@ -21,21 +21,25 @@ def get_matches(matches_stats, last_date_p, link, driver):
     soup = BeautifulSoup(page_source, 'lxml')
     match_id_list = []
     matches = soup.find_all('div', class_='event__match')
+    season_type = soup.find('div', class_='teamHeader__text')
     for match in matches:
         match_datetime = datetime.datetime.strptime(match.text[:12], "%d.%m. %H:%M")
 
         # month (after ending the season and before starting the new one) necessary for the correct year selection
         month = 7
 
-        if datetime.datetime.now().month > month > match_datetime.month:
-            match_datetime = match_datetime.replace(year=datetime.datetime.now().year + 1)
-        elif datetime.datetime.now().month < month < match_datetime.month:
-            match_datetime = match_datetime.replace(year=datetime.datetime.now().year - 1)
-        else:
+        if season_type.text == datetime.datetime.now().year:
             match_datetime = match_datetime.replace(year=datetime.datetime.now().year)
+        else:
+            if datetime.datetime.now().month > month > match_datetime.month:
+                match_datetime = match_datetime.replace(year=datetime.datetime.now().year + 1)
+            elif datetime.datetime.now().month < month < match_datetime.month:
+                match_datetime = match_datetime.replace(year=datetime.datetime.now().year - 1)
+            else:
+                match_datetime = match_datetime.replace(year=datetime.datetime.now().year)
         # if datetime.datetime.strptime(match.text[:12], "%d.%m. %H:%M") \
         #         .replace(year=datetime.datetime.now().year) > last_date_p:
-        if last_date_p < match_datetime < (datetime.datetime.now() + datetime.timedelta(weeks=5)):
+        if last_date_p < match_datetime < (datetime.datetime.now() + datetime.timedelta(weeks=4)):
             # required id number starts from 5th character
             match_id_list.append(match.get('id')[4:])
 
@@ -76,7 +80,7 @@ def get_matches(matches_stats, last_date_p, link, driver):
             print(result)
             # all_stats_html = soup.select('#tab-statistics-0-statistic div.statText')
             all_stats_html = soup.select('div.statCategory___33LOZ_7 div')
-            print(all_stats_html)
+            # print(all_stats_html)
             all_stats = []
             for i in range(len(all_stats_html)):
                 all_stats.append(all_stats_html[i].text)
@@ -86,5 +90,6 @@ def get_matches(matches_stats, last_date_p, link, driver):
                  'all_stats': all_stats}
         else:
             match_stats = {'flashscore_id': match_id, 'round': round_number, 'date': date, 'teams': teams}
-        matches_stats.append(match_stats)
+        if round_number.isnumeric():
+            matches_stats.append(match_stats)
     return matches_stats

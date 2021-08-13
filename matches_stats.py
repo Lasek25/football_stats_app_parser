@@ -18,7 +18,7 @@ def get_stats(leagues, url_end):
         print(league.split('/')[1].replace('-', ' ').title())
         last_date_p = select_update_at(league.split('/')[1].replace('-', ' ').title())[0]
         if isinstance(None, type(last_date_p)):
-            last_date_p = datetime.datetime.strptime("2020-08-01 00:00", "%Y-%m-%d %H:%M")
+            last_date_p = datetime.datetime.strptime("2021-07-01 00:00", "%Y-%m-%d %H:%M")
         link = "https://www.flashscore.pl/pilka-nozna/" + league + url_end
         matches_stats = get_matches(matches_stats, last_date_p, link, driver)
     driver.quit()
@@ -29,7 +29,7 @@ def insert_matches(matches_info, stats_info, url_end):
     query_teams_in_matches = "UPDATE teams_in_matches SET goals=%s, corners=%s, yellow_cards=%s, red_cards=%s," \
                              "fouls=%s, offsides=%s, shots_on_goal=%s, updated_at=now() WHERE " \
                              "(match_id IN (SELECT id FROM matches WHERE BINARY flashscore_id = %s)) AND " \
-                             "(teams_in_competition_id IN (SELECT id FROM teams_in_competitions WHERE team_id IN " \
+                             "(teams_in_competition_id IN (SELECT MAX(id) FROM teams_in_competitions WHERE team_id IN " \
                              "(SELECT id FROM teams WHERE name=%s)))"
 
     matches_data = []
@@ -119,9 +119,13 @@ def select_update_at(competition):
 
 
 def main():
+    # leagues = ['anglia/premier-league/', 'francja/ligue-1/', 'hiszpania/laliga/', 'niemcy/bundesliga/',
+    #            'polska/pko-bp-ekstraklasa/', 'wlochy/serie-a/', 'polska/fortuna-1-liga/']
     leagues = ['anglia/premier-league/', 'francja/ligue-1/', 'hiszpania/laliga/', 'niemcy/bundesliga/',
-               'polska/pko-bp-ekstraklasa/', 'wlochy/serie-a/', 'anglia/championship/', 'polska/fortuna-1-liga/']
-    # leagues = ['polska/fortuna-1-liga/']  # , 'hiszpania/laliga/', 'wlochy/serie-a/']
+               'polska/pko-bp-ekstraklasa/', 'wlochy/serie-a/', 'anglia/championship/', 'polska/fortuna-1-liga/',
+               'japonia/j1-league/', 'norwegia/eliteserien/']
+    # leagues = ['polska/pko-bp-ekstraklasa/']
+    # leagues = ['japonia/j1-league/', 'norwegia/eliteserien/']
     chosen_stats = ['Rzuty rożne', 'Żółte kartki', 'Czerwone kartki', 'Faule', 'Spalone', 'Strzały na bramkę']
     # to get correct data, first you should run with link parameter (data_type variable)
     # "wyniki" and next once again with link parameter (data_type variable) "spotkania"
@@ -129,7 +133,6 @@ def main():
     # data_type = "spotkania"
     matches_stats = get_stats(leagues, data_type)
     insert_matches(matches_stats, chosen_stats, data_type)
-    # update_points()
 
 
 if __name__ == "__main__":
